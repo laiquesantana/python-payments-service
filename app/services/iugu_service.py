@@ -33,4 +33,4 @@ class IuguService:
         )
 
         # Chamar o gateway para enviar a requisição à Iugu
-        return self.iugu_gateway.create_payment(charge_data)
+        return self.iugu_gateway.create_charge(charge_data)
