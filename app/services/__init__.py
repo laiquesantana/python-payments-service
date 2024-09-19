@@ -1,6 +1,6 @@
 # Import your model modules here.
 # isort: skip_file
-from .payment_service import PaymentService
+from .paypal_service import PaymentService
 from .paypal_gateway.paypal_client import PayPalClient
 from .vi_gateway.vi_gateway import VindiGateway
 from .vi_service import VindiService
