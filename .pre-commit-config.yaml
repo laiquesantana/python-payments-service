@@ -1,0 +1,81 @@
+repos:
+  - repo: local
+    hooks:
+      - id: black
+        name: black
+        entry: black
+        language: system
+        exclude: "^tests/|^migrations/|^docs/"
+        types: [python]
+
+  - repo: local
+    hooks:
+      - id: docformatter
+        name: docformatter
+        entry: docformatter
+        language: system
+        exclude: "^tests/|^migrations/|^docs/"
+        types: [python]
+        args:
+          - --config
+          - tox.ini
+
+  - repo: local
+    hooks:
+      - id: isort
+        name: isort
+        entry: isort
+        language: system
+        exclude: "^tests/|^migrations/|^docs/"
+        types: [python]
+        args:
+          - --profile
+          - black
+
+  - repo: local
+    hooks:
+      - id: bandit
+        name: bandit
+        entry: bandit
+        language: system
+        exclude: "^tests/|^migrations/|^docs/"
+        types: [python]
+        args:
+          - --configfile
+          - bandit.yaml
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        exclude: "^tests/|^migrations/|^docs/"
+        types: [python]
+        args:
+          - --config=.mypy.ini
+
+  - repo: local
+    hooks:
+      - id: flake8
+        name: flake8
+        entry: flake8
+        language: system
+        exclude: "^tests/|^migrations/|^docs/"
+        types: [python]
+        args:
+          - --config=.flake8
+
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]
+        exclude: "^tests/|^migrations/|^docs/"
+        args:
+          - --rcfile=.pylintrc
+          - ./app/
+          - -rn
+          - -sn

@@ -1,0 +1,11 @@
+.env
+.env*
+.git
+.gitignore
+.idea
+
+# Logs
+logs
+
+# Runtime data
+pids

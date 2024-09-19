@@ -1,0 +1,2 @@
+targets: "./app/"
+exclude_dirs: ["tests", "migrations", "database", "htmlcov", ".venv", "docs"]

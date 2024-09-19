@@ -1,0 +1,6 @@
+appmap_dir: tmp/appmap
+language: python
+name: fast_api_base
+packages:
+- path: tests
+- path: app

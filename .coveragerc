@@ -1,0 +1,31 @@
+[run]
+concurrency =
+  greenlet
+  thread
+
+omit = tests/*
+    *config/*
+    *config*
+    *__init__.py
+    *database.py*
+    *main.py*
+    */app/exceptions/*
+    */app/config/*
+    */app/events/publisher.py
+    */app/middlewares/middlewares.py
+    */app/router/startup.py
+    */app/router/handler_exception.py
+    */app/router/routes.py
+    */app/router/startup.py
+    */app/workers/utils.py
+    *celery_consumer.py
+    *celery.py
+    *celery_dlq.py
+    *structlog.py
+    *example*.py
+    
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:

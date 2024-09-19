@@ -1,0 +1,92 @@
+services:
+  app:
+    image: fastapi_base              # Nome da imagem Docker que será criada
+    container_name: fastapi_base_app # Nome do container para facilitar a identificação
+    environment:
+      - PYTHONPATH=/app              # Define o diretório da aplicação dentro do container
+      - SQLALCHEMY_WARN_20=1         # Ativa avisos de depreciação para o SQLAlchemy 2.0
+    env_file:
+      - .env  # Garante que as variáveis de ambiente do .env sejam carregadas      
+    build:
+      context: .                     # Define o contexto de build como o diretório atual
+      dockerfile: Dockerfile          # Usa o Dockerfile específico para construir a imagem
+    command: ['bash','entrypoint_api_dev.sh'] # Script de entrada para rodar a API no modo de desenvolvimento
+    ports:
+      - "2023:8000"                  # Mapeia a porta 8000 do container para a porta 2023 no host
+    volumes:
+      - .:/app                       # Monta o diretório atual no container, permitindo desenvolvimento local
+    stdin_open: true                  # Mantém o stdin aberto para interatividade
+    tty: true                         # Aloca um terminal tty para a sessão
+    networks:
+      - local_network
+
+  db:
+    image: postgres:14.3-alpine      # Imagem oficial do PostgreSQL versão 14.3 baseada no Alpine Linux
+    container_name: fastapi_base_db  # Nome do container para o banco de dados
+    environment:
+      - POSTGRES_USER=root           # Define o usuário do banco de dados
+      - POSTGRES_PASSWORD=root       # Define a senha do banco de dados
+      - POSTGRES_HOST_AUTH_METHOD=trust # Configura o método de autenticação para 'trust'
+    volumes:
+      - "./database/data:/var/lib/postgres/data"  # Monta um diretório local para persistir dados do banco de dados
+    ports:
+      - "5444:5432"                  # Mapeia a porta 5432 do container (PostgreSQL) para a porta 5444 no host
+    networks:
+      - local_network
+  redis:
+    image: redis:latest
+    ports:
+      - '6379:6379'
+
+  rabbitmq:
+    image: rabbitmq:3.9.29-management-alpine # Imagem RabbitMQ com interface de gerenciamento
+    container_name: fastapi_base_rabbit       # Nome do container RabbitMQ
+    ports:
+      - "5672:5672"                          # Mapeia a porta 5672 para comunicação com RabbitMQ
+      - "15672:15672"                        # Mapeia a porta 15672 para acessar a interface de gerenciamento do RabbitMQ
+    environment:
+      RABBITMQ_DEFAULT_VHOST: /          # Define o virtual host padrão
+      RABBITMQ_DEFAULT_USER: guest           # Usuário padrão
+      RABBITMQ_DEFAULT_PASS: guest           # Senha padrão
+    networks:
+      - local_network
+
+  celery_worker:
+    image: fastapi_base_app           # Usa a imagem da aplicação FastAPI para rodar o worker
+    container_name: fastapi_base_celery_worker # Nome do container para o Celery Worker
+    environment:
+      - PYTHONPATH=/app               # Define o caminho do Python dentro do container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app                        # Monta o diretório atual no container
+    command: ['bash','entrypoint_worker_dev.sh'] # Executa o script de entrada do Celery Worker
+    depends_on:
+      - redis
+      - rabbitmq
+      - app
+    stdin_open: true
+    tty: true
+    networks:
+      - local_network
+  celery_flower:
+    container_name: "fastapi_base_celery_flower"  # Nome do container para o Flower
+    environment:
+      - PYTHONPATH=/app
+      - CELERY_BROKER_URL=pyamqp://guest:guest@rabbitmq:5672//  # Configuração do broker Celery
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0  # Backend de resultados do Celery
+      - FLOWER_PORT=8888                            # Porta para acessar o Flower
+    image: mher/flower:latest                       # Imagem do Flower para monitorar o Celery
+    volumes:
+      - .:/app                                      # Monta o diretório atual no container
+    command: celery flower --port=8888              # Comando para iniciar o Flower
+    ports:
+      - 8888:8888                                   # Mapeia a porta 8888 do Flower
+    depends_on:
+      - celery_worker
+    networks:
+      - local_network
+networks:
+  local_network:
+    external: true
