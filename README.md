@@ -30,6 +30,7 @@ Attention: It's important that your `.env.test` have the `DATABASE_URL`
 docker-compose build app
 ```
 
+You can access swagger documentation in localhost:2023/core/docs
 ### Databases
 
 Create development and test databases
